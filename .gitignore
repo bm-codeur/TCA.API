@@ -1,0 +1,16 @@
+## Build artifacts
+bin/
+obj/
+out/
+
+## IDE
+.vs/
+*.user
+*.suo
+
+## Database
+*.db
+
+## OS
+.DS_Store
+Thumbs.db
