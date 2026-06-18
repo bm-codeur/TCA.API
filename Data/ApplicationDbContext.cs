@@ -82,11 +82,36 @@ public class ApplicationDbContext : DbContext
                 .WithMany(z => z.Chargements)
                 .HasForeignKey(c => c.ZoneId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(c => c.Chauffeur)
+                .WithMany()
+                .HasForeignKey(c => c.ChauffeurId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Username).IsUnique();
+
+            entity.HasOne(u => u.Chauffeur)
+                .WithMany()
+                .HasForeignKey(u => u.ChauffeurId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(u => u.SuperviseurGroupe)
+                .WithMany()
+                .HasForeignKey(u => u.SuperviseurGroupeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(u => u.SuperviseurZone)
+                .WithMany()
+                .HasForeignKey(u => u.SuperviseurZoneId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(u => u.SuperviseurGeneral)
+                .WithMany()
+                .HasForeignKey(u => u.SuperviseurGeneralId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

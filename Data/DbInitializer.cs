@@ -21,12 +21,16 @@ public static class DbInitializer
         var camions = SeedCamions(context, groupes);
         await context.SaveChangesAsync();
 
-        SeedChauffeurs(context, camions);
-        SeedSuperviseursGroupe(context, groupes);
-        SeedSuperviseursZone(context, zones);
-        SeedSuperviseurGeneral(context);
+        var chauffeurs = SeedChauffeurs(context, camions);
+        var superviseursGroupe = SeedSuperviseursGroupe(context, groupes);
+        var superviseursZone = SeedSuperviseursZone(context, zones);
+        var superviseurGeneral = SeedSuperviseurGeneral(context);
         SeedAdminUser(context);
 
+        await context.SaveChangesAsync();
+
+        // Seed test accounts linked to physical entities
+        SeedUserAccounts(context, chauffeurs, superviseursGroupe, superviseursZone, superviseurGeneral);
         await context.SaveChangesAsync();
     }
 
@@ -40,7 +44,10 @@ public static class DbInitializer
                 Distance = 25,
                 TarifChargement = 4_500_000,
                 ToursMaxParJour = 4,
-                ChargementMaxMois = 120,
+                ChargementMaxMois = 104,
+                ChargementMaxMoisChauffeur = 104,
+                ChargementMaxMoisGroupe = 1040,
+                ChargementMaxMoisZone = 2080,
                 PrimeChauffeurParChargement = 43_000,
                 PrimeSuperviseurGroupeParChargement = 9_000,
                 PrimeSuperviseurZoneParChargement = 7_000
@@ -51,7 +58,10 @@ public static class DbInitializer
                 Distance = 37,
                 TarifChargement = 5_700_000,
                 ToursMaxParJour = 3,
-                ChargementMaxMois = 90,
+                ChargementMaxMois = 78,
+                ChargementMaxMoisChauffeur = 78,
+                ChargementMaxMoisGroupe = 780,
+                ChargementMaxMoisZone = 1560,
                 PrimeChauffeurParChargement = 58_000,
                 PrimeSuperviseurGroupeParChargement = 12_000,
                 PrimeSuperviseurZoneParChargement = 9_500
@@ -62,7 +72,10 @@ public static class DbInitializer
                 Distance = 22,
                 TarifChargement = 4_200_000,
                 ToursMaxParJour = 5,
-                ChargementMaxMois = 150,
+                ChargementMaxMois = 130,
+                ChargementMaxMoisChauffeur = 130,
+                ChargementMaxMoisGroupe = 1300,
+                ChargementMaxMoisZone = 2600,
                 PrimeChauffeurParChargement = 35_000,
                 PrimeSuperviseurGroupeParChargement = 7_500,
                 PrimeSuperviseurZoneParChargement = 5_500
@@ -73,7 +86,10 @@ public static class DbInitializer
                 Distance = 55,
                 TarifChargement = 7_500_000,
                 ToursMaxParJour = 2,
-                ChargementMaxMois = 60,
+                ChargementMaxMois = 52,
+                ChargementMaxMoisChauffeur = 52,
+                ChargementMaxMoisGroupe = 520,
+                ChargementMaxMoisZone = 1040,
                 PrimeChauffeurParChargement = 88_000,
                 PrimeSuperviseurGroupeParChargement = 18_000,
                 PrimeSuperviseurZoneParChargement = 14_000
@@ -84,7 +100,10 @@ public static class DbInitializer
                 Distance = 35,
                 TarifChargement = 5_500_000,
                 ToursMaxParJour = 3,
-                ChargementMaxMois = 90,
+                ChargementMaxMois = 78,
+                ChargementMaxMoisChauffeur = 78,
+                ChargementMaxMoisGroupe = 780,
+                ChargementMaxMoisZone = 1560,
                 PrimeChauffeurParChargement = 58_000,
                 PrimeSuperviseurGroupeParChargement = 12_000,
                 PrimeSuperviseurZoneParChargement = 9_500
@@ -146,7 +165,7 @@ public static class DbInitializer
         return camions;
     }
 
-    private static void SeedChauffeurs(ApplicationDbContext context, List<Camion> camions)
+    private static List<Chauffeur> SeedChauffeurs(ApplicationDbContext context, List<Camion> camions)
     {
         var chauffeurs = camions.Select((camion, index) => new Chauffeur
         {
@@ -157,9 +176,10 @@ public static class DbInitializer
         }).ToList();
 
         context.Chauffeurs.AddRange(chauffeurs);
+        return chauffeurs;
     }
 
-    private static void SeedSuperviseursGroupe(ApplicationDbContext context, List<Groupe> groupes)
+    private static List<SuperviseurGroupe> SeedSuperviseursGroupe(ApplicationDbContext context, List<Groupe> groupes)
     {
         var superviseurs = groupes.Select((groupe, index) => new SuperviseurGroupe
         {
@@ -170,9 +190,10 @@ public static class DbInitializer
         }).ToList();
 
         context.SuperviseursGroupe.AddRange(superviseurs);
+        return superviseurs;
     }
 
-    private static void SeedSuperviseursZone(ApplicationDbContext context, List<Zone> zones)
+    private static List<SuperviseurZone> SeedSuperviseursZone(ApplicationDbContext context, List<Zone> zones)
     {
         var superviseurs = zones.Select((zone, index) => new SuperviseurZone
         {
@@ -183,16 +204,19 @@ public static class DbInitializer
         }).ToList();
 
         context.SuperviseursZone.AddRange(superviseurs);
+        return superviseurs;
     }
 
-    private static void SeedSuperviseurGeneral(ApplicationDbContext context)
+    private static SuperviseurGeneral SeedSuperviseurGeneral(ApplicationDbContext context)
     {
-        context.SuperviseursGeneral.Add(new SuperviseurGeneral
+        var sup = new SuperviseurGeneral
         {
             Nom = "Diallo",
             Prenom = "Mamadou",
             SalaireBase = SuperviseurGeneral.SalaireBaseDefault
-        });
+        };
+        context.SuperviseursGeneral.Add(sup);
+        return sup;
     }
 
     private static void SeedAdminUser(ApplicationDbContext context)
@@ -202,6 +226,59 @@ public static class DbInitializer
             Username = "admin",
             PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123"),
             Role = Roles.Admin
+        });
+    }
+
+    private static void SeedUserAccounts(
+        ApplicationDbContext context,
+        List<Chauffeur> chauffeurs,
+        List<SuperviseurGroupe> superviseursGroupe,
+        List<SuperviseurZone> superviseursZone,
+        SuperviseurGeneral superviseurGeneral)
+    {
+        // 1. Chauffeur account
+        if (chauffeurs.Any())
+        {
+            context.Users.Add(new User
+            {
+                Username = "chauffeur001",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Chauffeur@123"),
+                Role = Roles.Chauffeur,
+                ChauffeurId = chauffeurs[0].Id
+            });
+        }
+
+        // 2. Groupe Supervisor account
+        if (superviseursGroupe.Any())
+        {
+            context.Users.Add(new User
+            {
+                Username = "sup_groupe01",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Groupe@123"),
+                Role = Roles.SuperviseurGroupe,
+                SuperviseurGroupeId = superviseursGroupe[0].Id
+            });
+        }
+
+        // 3. Zone Supervisor account
+        if (superviseursZone.Any())
+        {
+            context.Users.Add(new User
+            {
+                Username = "sup_zone_bankoh",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Zone@123"),
+                Role = Roles.SuperviseurZone,
+                SuperviseurZoneId = superviseursZone[0].Id
+            });
+        }
+
+        // 4. General Supervisor account
+        context.Users.Add(new User
+        {
+            Username = "sup_general",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("General@123"),
+            Role = Roles.SuperviseurGeneral,
+            SuperviseurGeneralId = superviseurGeneral.Id
         });
     }
 }

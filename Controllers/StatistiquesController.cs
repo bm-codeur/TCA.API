@@ -7,7 +7,7 @@ namespace TCA.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Admin,SuperviseurGeneral,SuperviseurZone,SuperviseurGroupe")]
 public class StatistiquesController : ControllerBase
 {
     private readonly IStatistiquesService _service;

@@ -7,6 +7,7 @@ public class PrimeChauffeurDto
     public int ChauffeurId { get; set; }
     public string Nom { get; set; } = string.Empty;
     public string Prenom { get; set; } = string.Empty;
+    public string ZoneNom { get; set; } = string.Empty;
     public int NombreChargements { get; set; }
     public decimal PrimeUnitaire { get; set; }
     public decimal PrimeTotal { get; set; }

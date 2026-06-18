@@ -12,6 +12,7 @@ public interface IPrimeService
     Task<IEnumerable<PrimeSuperviseurGroupeDto>> GetPrimesSuperviseursGroupeAsync(int? mois, int? annee);
     Task<IEnumerable<PrimeSuperviseurZoneDto>> GetPrimesSuperviseursZoneAsync(int? mois, int? annee);
     Task<PrimeSuperviseurGeneralDto?> GetPrimeSuperviseurGeneralAsync(int? mois, int? annee);
+    Task<PrimeChauffeurDto?> GetPrimeChauffeurByIdAsync(int chauffeurId, int? mois, int? annee);
 }
 
 public class PrimeService : IPrimeService
@@ -33,6 +34,42 @@ public class PrimeService : IPrimeService
         _superviseurGeneralRepository = superviseurGeneralRepository;
     }
 
+    public async Task<PrimeChauffeurDto?> GetPrimeChauffeurByIdAsync(int chauffeurId, int? mois, int? annee)
+    {
+        var (start, end) = GetDateRange(mois, annee);
+        var chauffeur = await _context.Chauffeurs
+            .Include(c => c.Camion)
+            .ThenInclude(c => c!.Groupe)
+            .ThenInclude(g => g!.Zone)
+            .FirstOrDefaultAsync(c => c.Id == chauffeurId);
+
+        if (chauffeur is null) return null;
+
+        var nbChargements = await _context.Chargements
+            .CountAsync(c =>
+                c.EstRetourne &&
+                c.ChauffeurId == chauffeur.Id &&
+                c.DateChargement >= start &&
+                c.DateChargement <= end);
+
+        var zone = chauffeur.Camion?.Groupe?.Zone;
+        var primeUnitaire = zone?.PrimeChauffeurParChargement ?? 0;
+        var primeTotal = nbChargements * primeUnitaire;
+
+        return new PrimeChauffeurDto
+        {
+            ChauffeurId = chauffeur.Id,
+            Nom = chauffeur.Nom,
+            Prenom = chauffeur.Prenom,
+            ZoneNom = zone?.Nom ?? string.Empty,
+            NombreChargements = nbChargements,
+            PrimeUnitaire = primeUnitaire,
+            PrimeTotal = primeTotal,
+            SalaireBase = chauffeur.SalaireBase,
+            TotalRemuneration = chauffeur.SalaireBase + primeTotal
+        };
+    }
+
     public async Task<IEnumerable<PrimeChauffeurDto>> GetPrimesChauffeursAsync(int? mois, int? annee)
     {
         var (start, end) = GetDateRange(mois, annee);
@@ -49,7 +86,7 @@ public class PrimeService : IPrimeService
             var nbChargements = await _context.Chargements
                 .CountAsync(c =>
                     c.EstRetourne &&
-                    c.CamionId == chauffeur.CamionId &&
+                    c.ChauffeurId == chauffeur.Id &&
                     c.DateChargement >= start &&
                     c.DateChargement <= end);
 
@@ -62,6 +99,7 @@ public class PrimeService : IPrimeService
                 ChauffeurId = chauffeur.Id,
                 Nom = chauffeur.Nom,
                 Prenom = chauffeur.Prenom,
+                ZoneNom = zone?.Nom ?? string.Empty,
                 NombreChargements = nbChargements,
                 PrimeUnitaire = primeUnitaire,
                 PrimeTotal = primeTotal,

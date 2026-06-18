@@ -55,6 +55,9 @@ namespace TCA.API.Migrations
                     b.Property<decimal>("Carburant")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ChauffeurId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("DateChargement")
                         .HasColumnType("TEXT");
 
@@ -76,6 +79,8 @@ namespace TCA.API.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CamionId");
+
+                    b.HasIndex("ChauffeurId");
 
                     b.HasIndex("ZoneId");
 
@@ -215,6 +220,9 @@ namespace TCA.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ChauffeurId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -223,11 +231,28 @@ namespace TCA.API.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("SuperviseurGeneralId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SuperviseurGroupeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SuperviseurZoneId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChauffeurId");
+
+                    b.HasIndex("SuperviseurGeneralId");
+
+                    b.HasIndex("SuperviseurGroupeId");
+
+                    b.HasIndex("SuperviseurZoneId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -242,6 +267,15 @@ namespace TCA.API.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ChargementMaxMois")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChargementMaxMoisChauffeur")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChargementMaxMoisGroupe")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ChargementMaxMoisZone")
                         .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Distance")
@@ -293,6 +327,12 @@ namespace TCA.API.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("TCA.API.Models.Chauffeur", "Chauffeur")
+                        .WithMany()
+                        .HasForeignKey("ChauffeurId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TCA.API.Models.Zone", "Zone")
                         .WithMany("Chargements")
                         .HasForeignKey("ZoneId")
@@ -300,6 +340,8 @@ namespace TCA.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Camion");
+
+                    b.Navigation("Chauffeur");
 
                     b.Navigation("Zone");
                 });
@@ -346,6 +388,37 @@ namespace TCA.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Zone");
+                });
+
+            modelBuilder.Entity("TCA.API.Models.User", b =>
+                {
+                    b.HasOne("TCA.API.Models.Chauffeur", "Chauffeur")
+                        .WithMany()
+                        .HasForeignKey("ChauffeurId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TCA.API.Models.SuperviseurGeneral", "SuperviseurGeneral")
+                        .WithMany()
+                        .HasForeignKey("SuperviseurGeneralId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TCA.API.Models.SuperviseurGroupe", "SuperviseurGroupe")
+                        .WithMany()
+                        .HasForeignKey("SuperviseurGroupeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TCA.API.Models.SuperviseurZone", "SuperviseurZone")
+                        .WithMany()
+                        .HasForeignKey("SuperviseurZoneId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Chauffeur");
+
+                    b.Navigation("SuperviseurGeneral");
+
+                    b.Navigation("SuperviseurGroupe");
+
+                    b.Navigation("SuperviseurZone");
                 });
 
             modelBuilder.Entity("TCA.API.Models.Camion", b =>

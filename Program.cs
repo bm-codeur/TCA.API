@@ -37,6 +37,9 @@ builder.Services.AddScoped<IChauffeurService, ChauffeurService>();
 builder.Services.AddScoped<IChargementService, ChargementService>();
 builder.Services.AddScoped<IPrimeService, PrimeService>();
 builder.Services.AddScoped<IStatistiquesService, StatistiquesService>();
+builder.Services.AddScoped<ISuperviseurGeneralService, SuperviseurGeneralService>();
+builder.Services.AddScoped<ISuperviseurZoneService, SuperviseurZoneService>();
+builder.Services.AddScoped<ISuperviseurGroupeService, SuperviseurGroupeService>();
 
 builder.Services.AddAuthentication(options =>
 {

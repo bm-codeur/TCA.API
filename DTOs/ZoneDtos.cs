@@ -8,6 +8,9 @@ public class ZoneDto
     public decimal TarifChargement { get; set; }
     public int ToursMaxParJour { get; set; }
     public int ChargementMaxMois { get; set; }
+    public int ChargementMaxMoisChauffeur { get; set; }
+    public int ChargementMaxMoisGroupe { get; set; }
+    public int ChargementMaxMoisZone { get; set; }
     public decimal PrimeChauffeurParChargement { get; set; }
     public decimal PrimeSuperviseurGroupeParChargement { get; set; }
     public decimal PrimeSuperviseurZoneParChargement { get; set; }
@@ -20,6 +23,9 @@ public class CreateZoneDto
     public decimal TarifChargement { get; set; }
     public int ToursMaxParJour { get; set; }
     public int ChargementMaxMois { get; set; }
+    public int ChargementMaxMoisChauffeur { get; set; }
+    public int ChargementMaxMoisGroupe { get; set; }
+    public int ChargementMaxMoisZone { get; set; }
     public decimal PrimeChauffeurParChargement { get; set; }
     public decimal PrimeSuperviseurGroupeParChargement { get; set; }
     public decimal PrimeSuperviseurZoneParChargement { get; set; }

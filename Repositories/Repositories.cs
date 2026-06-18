@@ -59,7 +59,11 @@ public class CamionRepository : RepositoryRepository<Camion>, ICamionRepository
         await _dbSet.Include(c => c.Groupe).ToListAsync();
 
     public async Task<Camion?> GetByIdWithChargementsAsync(int id) =>
-        await _dbSet.Include(c => c.Chargements).FirstOrDefaultAsync(c => c.Id == id);
+    await _dbSet
+        .Include(c => c.Chargements)
+        .Include(c => c.Groupe)
+            .ThenInclude(g => g!.Zone)
+        .FirstOrDefaultAsync(c => c.Id == id);
 }
 
 public interface IChauffeurRepository : IRepository<Chauffeur>
